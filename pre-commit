@@ -7,13 +7,16 @@
 
 CWD="$( cd "$( dirname "$GIT_DIR/../.." )" && pwd )"
 
+BASE_PACKAGE="./src/collection"
+BP=$BASE_PACKAGE
+
 files=$(git diff --cached --name-only --diff-filter=ACM)
 [ -z $files ] && exit 0
 
 go_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.go$')
 if [ -n "$go_files" ]; then
-        echo >&2 "[INSPECT] go vet ./path/to/package/..."
-        result_vet=$(go vet ./path/to/package/...)
+        echo >&2 "[INSPECT] go vet $BP/..."
+        result_vet=$(go vet $BP/...)
         if [ $? -ne 0 ]; then
                 echo >&2 "Go files must be ensured by go vet."
                 exit 1
@@ -27,8 +30,8 @@ if [ -n "$go_files" ]; then
         fi
 fi
 
-echo >&2 "[TEST] go test ./path/to/package/..."
-go test ./path/to/package/...
+echo >&2 "[TEST] go test $BP/..."
+go test $BP/...
 if [ $? -ne 0 ]; then
         echo >&2 "Unit-test is broken: go test "
         exit 1
