@@ -1,0 +1,38 @@
+#!/bin/sh
+#
+# To use the "golint" command:
+#   $ go get -u golang.org/x/lint/golint
+# Reference: https://github.com/golang/lint
+#
+
+CWD="$( cd "$( dirname "$GIT_DIR/../.." )" && pwd )"
+
+files=$(git diff --cached --name-only --diff-filter=ACM)
+[ -z $files ] && exit 0
+
+go_files=$(git diff --cached --name-only --diff-filter=ACM | grep '\.go$')
+if [ -n "$go_files" ]; then
+        echo >&2 "[INSPECT] go vet ./path/to/package/..."
+        result_vet=$(go vet ./path/to/package/...)
+        if [ $? -ne 0 ]; then
+                echo >&2 "Go files must be ensured by go vet."
+                exit 1
+        fi
+
+        echo >&2 "[INSPECT] gofmt -l $go_files"
+        unformatted=$(gofmt -l $go_files)
+        if [ -z "$unformatted" ]; then
+                echo >&2 "Go files must be formatted with go fmt."
+                exit 1
+        fi
+fi
+
+echo >&2 "[TEST] go test ./path/to/package/..."
+go test ./path/to/package/...
+if [ $? -ne 0 ]; then
+        echo >&2 "Unit-test is broken: go test "
+        exit 1
+fi
+
+echo >&2 "[COMMITTED]"
+exit 0
