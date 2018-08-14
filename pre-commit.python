@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+
+CWD="$( cd "$( dirname "$GIT_DIR/../.." )" && pwd )"
+
+export PATH=$CWD"/venv/bin":$PATH
+
+PYTHON_PATH=$(which python)
+if [ -z "$PYTHON_PATH" ]; then
+  echo "[FAIL] Cannot find python in PATH, please specify python path manually: .git/hooks/pre-commit"
+  exit 1
+fi
+
+$PYTHON_PATH -m unittest discover -v -f
+if [ $? -ne 0 ]; then
+  echo "[FAIL] Unit-test is broken: "
+  exit 1
+fi
+
+echo "[COMMITTED]"
+exit 0
